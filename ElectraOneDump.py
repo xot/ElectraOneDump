@@ -14,13 +14,7 @@ import copy, os, io
 # Ableton Live imports
 from _Framework.ControlSurface import ControlSurface
 
-# local imports
-#from Devices import *
-
 # TODO: use p.name or p.original_name??
-
-# !!!! TODO: + for string concat is quadratic time; use io.StringIO or str.join()
-# and use 'f'strings! https://realpython.com/python-f-strings/
 
 MIDI_PORT = '1'
 MIDI_CHANNEL = '11'
@@ -236,22 +230,19 @@ def append_json_controls(s,parameters):
              
 ORDER_ORIGINAL = 0
 ORDER_SORTED = 1
-ORDER_USER = 2
 ORDER = ORDER_ORIGINAL
 
 # Order the parameters: original, sorted by name, or user defined
-def order_parameters(name, parameters):
+# WHEN USER DEFINED< RETRIEVE THE JSON FROM EXTERNAL STORAGE
+def order_parameters(device_name, parameters):
     if (ORDER == ORDER_ORIGINAL):
         return parameters
-    parameters_copy = []
-    for p in parameters:
-        parameters_copy.append(p)
-    if (ORDER == ORDER_SORTED):    
+    else: # ORDER == ORDER_SORTED
+        parameters_copy = []
+        for p in parameters:
+            parameters_copy.append(p)
         parameters_copy.sort(key=lambda p: p.name)
-    else:
-        # TODO ; also offer option to remap the name, and to assign to page
-        parameters_copy = user_order(device_name,parameters_copy) 
-    return parameters_copy
+        return parameters_copy
 
 def construct_json_preset(device_name, parameters):
     u"""Construct a Electra One JSON preset for the given list of Ableton Live 

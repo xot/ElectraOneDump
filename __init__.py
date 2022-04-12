@@ -1,4 +1,4 @@
-# 
+#
 from .ElectraOneDump import ElectraOneDump
 
 def create_instance(c_instance):
