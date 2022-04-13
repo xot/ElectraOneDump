@@ -14,7 +14,7 @@ import os, io
 # Ableton Live imports
 from _Framework.ControlSurface import ControlSurface
 
-import .ElectraOneDumper
+from .ElectraOneDumper import construct_json_preset
 
 LOCALDIR = 'src/ableton-control-scripts/ElectraOneDump/dumps'
 

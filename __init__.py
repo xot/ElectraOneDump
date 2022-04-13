@@ -1,6 +1,5 @@
 #
 from .ElectraOneDump import ElectraOneDump
-import .ElectraOneDumper
 
 def create_instance(c_instance):
     u""" Creates and returns the ElectraOneDump script """

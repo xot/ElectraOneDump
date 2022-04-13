@@ -11,6 +11,8 @@
 # Ableton Live imports
 from _Framework.ControlSurface import ControlSurface
 
+import io
+
 # TODO: use p.name or p.original_name??
 
 MIDI_PORT = 1
