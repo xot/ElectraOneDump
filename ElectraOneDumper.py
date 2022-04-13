@@ -13,12 +13,12 @@ from _Framework.ControlSurface import ControlSurface
 
 # TODO: use p.name or p.original_name??
 
-MIDI_PORT = '1'
-MIDI_CHANNEL = '11'
-DEVICE_ID = '1'
+MIDI_PORT = 1
+MIDI_CHANNEL = 11
+DEVICE_ID = 1
 
 # Electra One JSON file format version
-VERSION = '2'
+VERSION = 2
 # FIXME
 PROJECT_ID = 'NOs0I61ql9nDebe5pE2b'
 
