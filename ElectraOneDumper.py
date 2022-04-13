@@ -128,6 +128,8 @@ def append_json_toggle(s,idx):
     s.append( ',"type":"pad"'
             , ',"mode":"toggle"'
             , ',"values":[{"message":{"type":"cc7"'
+            ,                       ',"offValue": 0'
+            ,                       ',"onValue": 127'
             ,                      f',"parameterNumber":{ idx+1 }'
             ,                      f',"deviceId":{ DEVICE_ID }'
             ,                       '}' 
