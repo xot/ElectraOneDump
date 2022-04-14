@@ -201,7 +201,7 @@ def append_json_toggle(s,idx):
 def append_json_list(s,idx, overlay_idx):
     s.append( ',"type":"list"'
             ,  ',"values":[{"message":{"type":"cc7"' 
-            ,                       f',"parameterNumber":{ cc_for_idx(idx+1) } '
+            ,                       f',"parameterNumber":{ cc_for_idx(idx) } '
             ,                       f',"deviceId":{ DEVICE_ID }'
             ,                        '}' 
             ,            f',"overlayId": { check_overlayid(overlay_idx) }'
