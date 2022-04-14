@@ -22,7 +22,8 @@ def dump_preset(device):
     u"""Dump the parameters in the device as a ElectraOne JSON preset"""
     #
     device_name = device.class_name
-    (s,map) = construct_json_patchinfo( device_name, device.parameters )
+    info = construct_json_patchinfo( device_name, device.parameters )
+    s = info.get_patch()
     home = os.path.expanduser("~")
     path =  f'{ home }/{ LOCALDIR }'
     if not os.path.exists(path):
@@ -33,9 +34,16 @@ def dump_preset(device):
         f.write(s)
     fname = f'{ path }/{ device_name }.ccmap'
     with open(fname,'w') as f:
+        comma = False
         f.write('{')
-        for p in map:
-            f.write(f"'{ p }': { map[p] } ,\n")
+        for p in device.parameters:
+            name = p.original_name
+            cc = info.get_cc_for_parameter(name)
+            if cc:
+                if comma:
+                    f.write(',')
+                comma = True
+            f.write(f"'{ name }': { cc }\n")
         f.write('}')
 
         

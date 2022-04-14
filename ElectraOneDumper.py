@@ -66,10 +66,10 @@ class PatchInfo ():
 
     # Return the MIDI CC parameter assigned to the device parameter. Return
     # None if not mapped.
-    def get_cc_for_parameter(self,parameter_original_name,default):
+    def get_cc_for_parameter(self,parameter_original_name):
         assert self._cc_map != None, 'Empty cc-map'
         if parameter_original_name in self._cc_map:
-            return cc_map[parameter_original_name] 
+            return self._cc_map[parameter_original_name] 
         else:
             return None
 
@@ -79,7 +79,7 @@ class PatchInfo ():
      
 # ---
 
-def cc_for_index(i):
+def cc_for_idx(i):
     return i+1
 
 
@@ -310,6 +310,6 @@ def construct_json_patchinfo(device_name, parameters):
         Ableton Live Device/Instrument parameters. Return as PatchInfo."""
 
     parameters = order_parameters(device_name,parameters)    
-    patch_json = construct_json_patchpreset(device_name, parameters)
+    patch_json = construct_json_preset(device_name, parameters)
     cc_map = construct_patch_map(parameters)
     return PatchInfo(patch_json,cc_map)
