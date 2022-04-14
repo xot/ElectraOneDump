@@ -50,7 +50,38 @@ class MutableString(io.StringIO):
         for e in elements:
             self.write(str(e))
 
+# --- PatchInfo ---
+
+class PatchInfo ():
+    # - The preset is a JSON string in Electra One format.
+    #   (The current implementation assumes that all quantized parameters
+    #   are 7-bit absolute CC values while all non quantized parameters are
+    #   14-bit absolute values)
+    # - The MIDI cc mapping data is a dictionary of Ableton Live original
+    #   parameter names with their corresponding MIDI CC values in the preset.
+
+    def __init__(self,json_patch,cc_map):
+        self._json_patch = json_patch
+        self._cc_map = cc_map
+
+    # Return the MIDI CC parameter assigned to the device parameter. Return
+    # None if not mapped.
+    def get_cc_for_parameter(self,parameter_original_name,default):
+        assert self._cc_map != None, 'Empty cc-map'
+        if parameter_original_name in self._cc_map:
+            return cc_map[parameter_original_name] 
+        else:
+            return None
+
+    def get_patch(self):
+        assert self._json_patch != None, 'Empty JSON patch'
+        return self._json_patch
+     
 # ---
+
+def cc_for_index(i):
+    return i+1
+
 
 def append_comma(s,flag):
     if flag:
@@ -130,7 +161,7 @@ def append_json_toggle(s,idx):
             , ',"values":[{"message":{"type":"cc7"'
             ,                       ',"offValue": 0'
             ,                       ',"onValue": 127'
-            ,                      f',"parameterNumber":{ idx+1 }'
+            ,                      f',"parameterNumber":{ cc_for_idx(idx) }'
             ,                      f',"deviceId":{ DEVICE_ID }'
             ,                       '}' 
             ,            ',"id":"value"'
@@ -140,7 +171,7 @@ def append_json_toggle(s,idx):
 def append_json_list(s,idx, overlay_idx):
     s.append( ',"type":"list"'
             ,  ',"values":[{"message":{"type":"cc7"' 
-            ,                       f',"parameterNumber":{ idx+1 } '
+            ,                       f',"parameterNumber":{ cc_for_idx(idx+1) } '
             ,                       f',"deviceId":{ DEVICE_ID }'
             ,                        '}' 
             ,            f',"overlayId": { overlay_idx }'
@@ -176,7 +207,7 @@ def append_json_fader(s,idx, p):
         max = 16383
     s.append( ',"type":"fader"'
             , ',"values":[{"message":{"type":"cc14"' 
-            ,                      f',"parameterNumber":{ idx+1 }'
+            ,                      f',"parameterNumber":{ cc_for_idx(idx) }'
             ,                      f',"deviceId":{ DEVICE_ID }'
             ,                       ',"lsbFirst":false'
             ,                      f',"min":{ min }'
@@ -249,7 +280,6 @@ def construct_json_preset(device_name, parameters):
     u"""Construct a Electra One JSON preset for the given list of Ableton Live 
         Device/Instrument parameters. Return as string."""
     #
-    parameters = order_parameters(device_name,parameters)    
     s = MutableString()
     s.append( f'{{"version": { VERSION }'
             , f',"name":"{ device_name }"'
@@ -268,3 +298,18 @@ def construct_json_preset(device_name, parameters):
     s.append( '}' )
     return s.getvalue()
 
+def construct_patch_map(parameters):
+    cc_map = {}
+    for (i,p) in  enumerate(parameters):
+        cc_map[p.original_name] = cc_for_idx(i)
+    return cc_map
+
+def construct_json_patchinfo(device_name, parameters):
+    u"""Construct a Electra One JSON preset and a corresponding
+        dictionary for the mapping to MIDI CC values for the given list of
+        Ableton Live Device/Instrument parameters. Return as PatchInfo."""
+
+    parameters = order_parameters(device_name,parameters)    
+    patch_json = construct_json_patchpreset(device_name, parameters)
+    cc_map = construct_patch_map(parameters)
+    return PatchInfo(patch_json,cc_map)

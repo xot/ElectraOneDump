@@ -14,7 +14,7 @@ import os, io
 # Ableton Live imports
 from _Framework.ControlSurface import ControlSurface
 
-from .ElectraOneDumper import construct_json_preset
+from .ElectraOneDumper import construct_json_patchinfo
 
 LOCALDIR = 'src/ableton-control-scripts/ElectraOneDump/dumps'
 
@@ -22,7 +22,7 @@ def dump_preset(device):
     u"""Dump the parameters in the device as a ElectraOne JSON preset"""
     #
     device_name = device.class_name
-    s = construct_json_preset( device_name, device.parameters )
+    (s,map) = construct_json_patchinfo( device_name, device.parameters )
     home = os.path.expanduser("~")
     path =  f'{ home }/{ LOCALDIR }'
     if not os.path.exists(path):
@@ -31,6 +31,12 @@ def dump_preset(device):
     fname = f'{ path }/{ device_name }.json'
     with open(fname,'w') as f:            
         f.write(s)
+    fname = f'{ path }/{ device_name }.ccmap'
+    with open(fname,'w') as f:
+        f.write('{')
+        for p in map:
+            f.write(f"'{ p }': { map[p] } ,\n")
+        f.write('}')
 
         
 class ElectraOneDump(ControlSurface):
