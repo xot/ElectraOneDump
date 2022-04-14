@@ -227,7 +227,7 @@ def append_json_control(s, idx, parameter):
     controlset = 1 + ((idx % PARAMETERS_PER_PAGE) // CONTROLSETS_PER_PAGE)
     pot = 1 + (idx % (PARAMETERS_PER_PAGE // CONTROLSETS_PER_PAGE))
     s.append( f'{{"id": { idx+1 }'
-            , f',"name":" { parameter.name } "'
+            , f',"name":"{ parameter.name }"'
             ,  ',"visible":true' 
             , f',"color":"{ COLOR }"' 
             , f',"pageId":{ page }'
