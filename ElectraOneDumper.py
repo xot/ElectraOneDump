@@ -37,6 +37,13 @@ HEIGHT = 56
 XCOORDS = [0,170,340,510,680,850]
 YCOORDS = [40,128,216,304,392,480]
 
+# maximum values in a preset
+
+MAX_NAME_LEN =14
+MAX_ID = 432
+MAX_PAGE_ID = 12
+MAX_OVERLAY_ID = 51
+
 # --- MutableString---
 
 # A mutuable string class that allows the gradual construction of long strinsg
@@ -92,10 +99,22 @@ def append_comma(s,flag):
         s.append(',')
     return True
 
-# truncate
-def truncate(s,len):
-    # TODO issue warning
-    return s[:len]
+# check/truncate name
+def check_name(name):
+    # TODO log truncation
+    return name[:MAX_NAME_LEN]
+
+def check_id(id):
+    assert id <= MAX_ID, f'Max number of IDs ({ MAX_ID }) exceeded.'
+    return id
+
+def check_pageid(id):
+    assert id <= MAX_PAGE_ID, f'Max number of pages ({ MAX_PAGE_ID }) exceeded.'
+    return id
+
+def check_overlayid(id):
+    assert id <= MAX_OVERLAY_ID, f'Max number of overlays ({ MAX_OVERLAY_ID }) exceeded.'
+    return id
 
 # ---
 
@@ -105,7 +124,7 @@ def append_json_pages(s,parameters) :
     flag = False
     for i in range(1,pagecount+1):
         flag = append_comma(s,flag)
-        s.append( f'{{"id":{ i },"name":"Page { i }"}}')
+        s.append( f'{{"id":{ check_pageid(i) },"name":"Page { i }"}}')
     s.append(']')
 
 # Does the parameter have the values "Off" and "On" only
@@ -143,7 +162,7 @@ def append_json_overlay_items(s,value_items):
     s.append(']')
 
 def append_json_overlay(s,idx,parameter):
-    s.append(f'{{"id":{ idx }')
+    s.append(f'{{"id":{ check_overlayid(idx) }')
     append_json_overlay_items(s,parameter.value_items)
     s.append('}')
 
@@ -185,7 +204,7 @@ def append_json_list(s,idx, overlay_idx):
             ,                       f',"parameterNumber":{ cc_for_idx(idx+1) } '
             ,                       f',"deviceId":{ DEVICE_ID }'
             ,                        '}' 
-            ,            f',"overlayId": { overlay_idx }'
+            ,            f',"overlayId": { check_overlayid(overlay_idx) }'
             ,             ',"id":"value"'
             ,             '}]'
             )
@@ -232,16 +251,14 @@ def append_json_fader(s,idx, p):
 overlay_idx = 0
 
 
-NAME_LEN=14
-
 # idx: starts at 0!
 def append_json_control(s, idx, parameter):
     global overlay_idx
     page = 1 + (idx // PARAMETERS_PER_PAGE)
     controlset = 1 + ((idx % PARAMETERS_PER_PAGE) // CONTROLSETS_PER_PAGE)
     pot = 1 + (idx % (PARAMETERS_PER_PAGE // CONTROLSETS_PER_PAGE))
-    s.append( f'{{"id": { idx+1 }'
-            , f',"name":"{ truncate(parameter.name,NAME_LEN) }"'
+    s.append( f'{{"id": { check_id(idx+1) }'
+            , f',"name":"{ check_name(parameter.name) }"'
             ,  ',"visible":true' 
             , f',"color":"{ COLOR }"' 
             , f',"pageId":{ page }'
@@ -296,7 +313,7 @@ def construct_json_preset(device_name, parameters):
     #
     s = MutableString()
     s.append( f'{{"version": { VERSION }'
-            , f',"name":"{ truncate(device_name,NAME_LEN) }"'
+            , f',"name":"{ check_name(device_name) }"'
             , f',"projectId":"{ PROJECT_ID }"'
             )
     append_json_pages(s, parameters)
