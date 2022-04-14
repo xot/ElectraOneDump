@@ -255,7 +255,7 @@ overlay_idx = 0
 def append_json_control(s, idx, parameter):
     global overlay_idx
     page = 1 + (idx // PARAMETERS_PER_PAGE)
-    controlset = 1 + ((idx % PARAMETERS_PER_PAGE) // CONTROLSETS_PER_PAGE)
+    controlset = 1 + ((idx % PARAMETERS_PER_PAGE) // (PARAMETERS_PER_PAGE // CONTROLSETS_PER_PAGE))
     pot = 1 + (idx % (PARAMETERS_PER_PAGE // CONTROLSETS_PER_PAGE))
     s.append( f'{{"id": { check_id(idx+1) }'
             , f',"name":"{ check_name(parameter.name) }"'
