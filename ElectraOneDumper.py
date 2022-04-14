@@ -79,15 +79,26 @@ class PatchInfo ():
      
 # ---
 
+# return the MIDI CC assigned to a parameter with index i
 def cc_for_idx(i):
     return i+1
 
-
+# append a comma if flag; return true; use-case
+# flag = false
+# flag = append_comma(flag)
+# to append comma's to a list
 def append_comma(s,flag):
     if flag:
         s.append(',')
     return True
-    
+
+# truncate
+def truncate(s,len):
+    # TODO issue warning
+    return s[:len]
+
+# ---
+
 def append_json_pages(s,parameters) :
     s.append(',"pages":[')
     pagecount = 1 + (len(parameters) // PARAMETERS_PER_PAGE)
@@ -220,6 +231,9 @@ def append_json_fader(s,idx, p):
 # TODO: FIXME: global parameter   
 overlay_idx = 0
 
+
+NAME_LEN=14
+
 # idx: starts at 0!
 def append_json_control(s, idx, parameter):
     global overlay_idx
@@ -227,7 +241,7 @@ def append_json_control(s, idx, parameter):
     controlset = 1 + ((idx % PARAMETERS_PER_PAGE) // CONTROLSETS_PER_PAGE)
     pot = 1 + (idx % (PARAMETERS_PER_PAGE // CONTROLSETS_PER_PAGE))
     s.append( f'{{"id": { idx+1 }'
-            , f',"name":"{ parameter.name }"'
+            , f',"name":"{ truncate(parameter.name,NAME_LEN) }"'
             ,  ',"visible":true' 
             , f',"color":"{ COLOR }"' 
             , f',"pageId":{ page }'
@@ -282,7 +296,7 @@ def construct_json_preset(device_name, parameters):
     #
     s = MutableString()
     s.append( f'{{"version": { VERSION }'
-            , f',"name":"{ device_name }"'
+            , f',"name":"{ truncate(device_name,NAME_LEN) }"'
             , f',"projectId":"{ PROJECT_ID }"'
             )
     append_json_pages(s, parameters)
