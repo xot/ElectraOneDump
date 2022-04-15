@@ -13,10 +13,13 @@ import os, io
 
 # Ableton Live imports
 from _Framework.ControlSurface import ControlSurface
+from _Generic.util import DeviceAppointer
 
 from .ElectraOneDumper import construct_json_patchinfo
 
 LOCALDIR = 'src/ableton-control-scripts/ElectraOneDump/dumps'
+DEBUG = True
+
 
 def dump_preset(device):
     u"""Dump the parameters in the device as a ElectraOne JSON preset"""
@@ -54,13 +57,25 @@ class ElectraOneDump(ControlSurface):
         self.log_message(f'error: {s}')
 
 
-    def __init__(self, *a, **k):
-        super(ElectraOneDump, self).__init__(*a, **k)
+    def __init__(self, c_instance):
+        ControlSurface.__init__(self, c_instance)
+        # TODO: check that indeed an Electra One is connected
+        self.__c_instance = c_instance
         self._appointed_device = None
+        # register a device appointer;  _set_appointed_device will be called when appointed device changed
+        # see _Generic/util.py
+        self._device_appointer = DeviceAppointer(song=self.__c_instance.song(), appointed_device_setter=self._set_appointed_device)
         self.log_message("ElectraOneDump loaded.")
 
+    def debug(self,m):
+        if DEBUG:
+            self.log_message(m)
+
     def update_display(self):
-        device = self.song().appointed_device
+        pass
+    
+    def _set_appointed_device(self, device):
+        self.debug(f'ElectraOne device appointed { device.class_name }')
         if device != self._appointed_device:
             self._appointed_device = device
             if device != None:

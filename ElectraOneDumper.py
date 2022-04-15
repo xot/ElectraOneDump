@@ -11,7 +11,7 @@
 # Ableton Live imports
 from _Framework.ControlSurface import ControlSurface
 
-import io
+import io, random, string
 
 # TODO: use p.name or p.original_name??
 
@@ -21,8 +21,6 @@ DEVICE_ID = 1
 
 # Electra One JSON file format version
 VERSION = 2
-# FIXME
-PROJECT_ID = 'NOs0I61ql9nDebe5pE2b'
 
 PARAMETERS_PER_PAGE = 3 * 12
 CONTROLSETS_PER_PAGE = 3
@@ -39,10 +37,12 @@ YCOORDS = [40,128,216,304,392,480]
 
 # maximum values in a preset
 
-MAX_NAME_LEN =14
+MAX_NAME_LEN = 14
 MAX_ID = 432
 MAX_PAGE_ID = 12
 MAX_OVERLAY_ID = 51
+MAX_CONTROLSET_ID = CONTROLSETS_PER_PAGE
+MAX_POT_ID = (PARAMETERS_PER_PAGE // CONTROLSETS_PER_PAGE)
 
 # --- MutableString---
 
@@ -88,6 +88,7 @@ class PatchInfo ():
 
 # return the MIDI CC assigned to a parameter with index i
 def cc_for_idx(i):
+    assert ((0 <= i) and (i < 127)), f'MIDI CC parameter out of range { i+1 }.'
     return i+1
 
 # append a comma if flag; return true; use-case
@@ -105,16 +106,26 @@ def check_name(name):
     return name[:MAX_NAME_LEN]
 
 def check_id(id):
-    assert id <= MAX_ID, f'Max number of IDs ({ MAX_ID }) exceeded.'
+    assert (1 <= id) and (id <= MAX_ID), f'Max number of IDs ({ MAX_ID }) exceeded.'
     return id
 
 def check_pageid(id):
-    assert id <= MAX_PAGE_ID, f'Max number of pages ({ MAX_PAGE_ID }) exceeded.'
+    assert (1 <= id) and (id <= MAX_PAGE_ID), f'Max number of pages ({ MAX_PAGE_ID }) exceeded.'
     return id
 
 def check_overlayid(id):
-    assert id <= MAX_OVERLAY_ID, f'Max number of overlays ({ MAX_OVERLAY_ID }) exceeded.'
+    assert (1 <= id) and (id <= MAX_OVERLAY_ID), f'Max number of overlays ({ MAX_OVERLAY_ID }) exceeded.'
     return id
+
+# This is more strict than the Electra One documentation requires
+def check_controlset(id):
+    assert (1 <= id) and (id <= MAX_CONTROLSET_ID), f'Max number of controlsets ({ MAX_CONTROLSET_ID }) exceeded.'
+    return id
+
+def check_pot(id):
+    assert (1 <= id) and (id <= MAX_POT_ID), f'Max number of pots ({ MAX_POT_ID }) exceeded.'
+    return id
+    
 
 # ---
 
@@ -153,10 +164,12 @@ def append_json_overlay_item(s,label,index,value):
 def append_json_overlay_items(s,value_items):
     s.append(',"items":[')
     flag = False
-    for (idx,item) in enumerate( value_items ):
+    for (idx,item) in enumerate(value_items):
+        assert (len(value_items) <= 127), f'Too many overly items { len(value_items) }.'
         # for a list with n items, item i (staring at 0) has MIDI CC control
         # value round(i * 127/(n-1)) 
         item_cc_value = round( idx * (127 / (len(value_items)-1) ) )
+        assert (0 <= item_cc_value) and (item_cc_value <= 127), f'MIDI CC value out of range { item_cc_value }.'
         flag = append_comma(s,flag)
         append_json_overlay_item(s,item,idx,item_cc_value)
     s.append(']')
@@ -251,7 +264,7 @@ def append_json_fader(s,idx, p):
 overlay_idx = 0
 
 
-# idx: starts at 0!
+# idx (for the parameter): starts at 0!
 def append_json_control(s, idx, parameter):
     global overlay_idx
     page = 1 + (idx // PARAMETERS_PER_PAGE)
@@ -261,9 +274,9 @@ def append_json_control(s, idx, parameter):
             , f',"name":"{ check_name(parameter.name) }"'
             ,  ',"visible":true' 
             , f',"color":"{ COLOR }"' 
-            , f',"pageId":{ page }'
-            , f',"controlSetId":{ controlset }'
-            , f',"inputs":[{{"potId":{ pot },"valueId":"value"}}]'
+            , f',"pageId":{ check_pageid(page) }'
+            , f',"controlSetId":{ check_controlset(controlset) }'
+            , f',"inputs":[{{"potId":{ check_pot(pot) },"valueId":"value"}}]'
             )
     append_json_bounds(s,idx)
     # TODO diversify:
@@ -290,7 +303,8 @@ def append_json_controls(s,parameters):
         flag = append_comma(s,flag)
         append_json_control(s,i,p)
     s.append(']')
-             
+
+# TODO/FIXME : Move to config.py
 ORDER_ORIGINAL = 0
 ORDER_SORTED = 1
 ORDER = ORDER_ORIGINAL
@@ -311,6 +325,7 @@ def construct_json_preset(device_name, parameters):
     u"""Construct a Electra One JSON preset for the given list of Ableton Live 
         Device/Instrument parameters. Return as string."""
     #
+    PROJECT_ID = ''.join(random.choices(string.ascii_uppercase + string.digits, k=20))
     s = MutableString()
     s.append( f'{{"version": { VERSION }'
             , f',"name":"{ check_name(device_name) }"'
