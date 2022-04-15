@@ -217,7 +217,7 @@ def append_json_list(s,idx, overlay_idx):
             ,                       f',"parameterNumber":{ cc_for_idx(idx) } '
             ,                       f',"deviceId":{ DEVICE_ID }'
             ,                        '}' 
-            ,            f',"overlayId": { check_overlayid(overlay_idx) }'
+            ,            f',"overlayId":{ check_overlayid(overlay_idx) }'
             ,             ',"id":"value"'
             ,             '}]'
             )
@@ -270,7 +270,7 @@ def append_json_control(s, idx, parameter):
     page = 1 + (idx // PARAMETERS_PER_PAGE)
     controlset = 1 + ((idx % PARAMETERS_PER_PAGE) // (PARAMETERS_PER_PAGE // CONTROLSETS_PER_PAGE))
     pot = 1 + (idx % (PARAMETERS_PER_PAGE // CONTROLSETS_PER_PAGE))
-    s.append( f'{{"id": { check_id(idx+1) }'
+    s.append( f'{{"id":{ check_id(idx+1) }'
             , f',"name":"{ check_name(parameter.name) }"'
             ,  ',"visible":true' 
             , f',"color":"{ COLOR }"' 
@@ -327,7 +327,7 @@ def construct_json_preset(device_name, parameters):
     #
     PROJECT_ID = ''.join(random.choices(string.ascii_uppercase + string.digits, k=20))
     s = MutableString()
-    s.append( f'{{"version": { VERSION }'
+    s.append( f'{{"version":{ VERSION }'
             , f',"name":"{ check_name(device_name) }"'
             , f',"projectId":"{ PROJECT_ID }"'
             )
