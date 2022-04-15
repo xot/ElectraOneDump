@@ -159,16 +159,18 @@ def append_json_overlay_item(s,label,index,value):
             , f',"value":{ value }'
             ,  '}'
             )
-    
+
+# for a list with n items, item i (staring at 0) has MIDI CC control
+# value round(i * 127/(n-1)) 
+def cc_value_for_item_idx(idx,items):
+    return round( idx * (127 / (len(items)-1) ) )
 
 def append_json_overlay_items(s,value_items):
     s.append(',"items":[')
     flag = False
     for (idx,item) in enumerate(value_items):
         assert (len(value_items) <= 127), f'Too many overly items { len(value_items) }.'
-        # for a list with n items, item i (staring at 0) has MIDI CC control
-        # value round(i * 127/(n-1)) 
-        item_cc_value = round( idx * (127 / (len(value_items)-1) ) )
+        item_cc_value = cc_value_for_item_idx(idx,value_items)
         assert (0 <= item_cc_value) and (item_cc_value <= 127), f'MIDI CC value out of range { item_cc_value }.'
         flag = append_comma(s,flag)
         append_json_overlay_item(s,item,idx,item_cc_value)
