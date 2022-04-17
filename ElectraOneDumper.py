@@ -14,6 +14,9 @@ from _Framework.ControlSurface import ControlSurface
 import io, random, string
 
 # TODO: use p.name or p.original_name??
+#
+# TODO: 14bit controllers actually use two CC_NO parameters!
+# (cc_no and cc_no+32); make sure the dumper does not generate clashes!
 
 MIDI_PORT = 1
 MIDI_CHANNEL = 11
